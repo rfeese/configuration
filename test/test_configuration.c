@@ -5,8 +5,8 @@
 
 void reset_configuration(){
 	for(int i = 0; i < CONFIGURATION_ITEMS_MAX; i++){
-		configuration_mappings[i].key[0] = '\0'; 
-		configuration_mappings[i].index = 0; 
+		configuration.mappings[i].key[0] = '\0'; 
+		configuration.mappings[i].index = 0; 
 		configuration.items[i].key[0] = '\0'; 
 		configuration.items[i].val_type = CONFIGURATION_VAL_INT; 
 		configuration.items[i].val.int_value = 0; 
@@ -81,16 +81,16 @@ void test_configuration_init_indexes(){
 	};
 
 	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_init_indexes(confmap), "configuration_init_indexes should succeed.");
-	TEST_ASSERT_EQUAL_STRING_MESSAGE("three", configuration_mappings[0].key, "configuration mapping key at 0 should be three.");
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("three", configuration.mappings[0].key, "configuration mapping key at 0 should be three.");
 	TEST_ASSERT_EQUAL_STRING_MESSAGE("three", configuration.items[3].key, "configuration item key at 3 should be three.");
-	TEST_ASSERT_EQUAL_INT_MESSAGE(3, configuration_mappings[0].index, "configuration mapping index at 0 should be 3.");
-	TEST_ASSERT_EQUAL_STRING_MESSAGE("two", configuration_mappings[1].key, "configuration mapping key at 1 should be two.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(3, configuration.mappings[0].index, "configuration mapping index at 0 should be 3.");
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("two", configuration.mappings[1].key, "configuration mapping key at 1 should be two.");
 	TEST_ASSERT_EQUAL_STRING_MESSAGE("two", configuration.items[2].key, "configuration item key at 2 should be two.");
-	TEST_ASSERT_EQUAL_INT_MESSAGE(2, configuration_mappings[1].index, "configuration mapping index at 1 should be 2.");
-	TEST_ASSERT_EQUAL_STRING_MESSAGE("one", configuration_mappings[2].key, "configuration mapping key at 2 should be one.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(2, configuration.mappings[1].index, "configuration mapping index at 1 should be 2.");
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("one", configuration.mappings[2].key, "configuration mapping key at 2 should be one.");
 	TEST_ASSERT_EQUAL_STRING_MESSAGE("one", configuration.items[1].key, "configuration item key at 1 should be one.");
-	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_mappings[2].index, "configuration mapping index at 2 should be 1.");
-	TEST_ASSERT_EQUAL_STRING_MESSAGE("", configuration_mappings[3].key, "configuration mapping key at 3 should be empty.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration.mappings[2].index, "configuration mapping index at 2 should be 1.");
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("", configuration.mappings[3].key, "configuration mapping key at 3 should be empty.");
 }
 
 void test_configuration_load(){
@@ -104,12 +104,12 @@ void test_configuration_load(){
 
 	// test load using indexes
 	reset_configuration();
-	snprintf(configuration_mappings[0].key, CONFIGURATION_KEY_MAX, "%s", "three");
-	configuration_mappings[0].index = 0;
-	snprintf(configuration_mappings[1].key, CONFIGURATION_KEY_MAX, "%s", "two");
-	configuration_mappings[1].index = 1;
-	snprintf(configuration_mappings[2].key, CONFIGURATION_KEY_MAX, "%s", "one");
-	configuration_mappings[2].index = 2;
+	snprintf(configuration.mappings[0].key, CONFIGURATION_KEY_MAX, "%s", "three");
+	configuration.mappings[0].index = 0;
+	snprintf(configuration.mappings[1].key, CONFIGURATION_KEY_MAX, "%s", "two");
+	configuration.mappings[1].index = 1;
+	snprintf(configuration.mappings[2].key, CONFIGURATION_KEY_MAX, "%s", "one");
+	configuration.mappings[2].index = 2;
 	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_load(), "Configuration should have been loaded.");
 	TEST_ASSERT_EQUAL_INT_MESSAGE(8, configuration.num_items, "Number of configuration should have been eight.");
 	TEST_ASSERT_EQUAL_INT_MESSAGE(8, configuration.num_items, "Number of configuration should have been eight.");

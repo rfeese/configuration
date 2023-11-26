@@ -21,8 +21,6 @@ typedef struct configuration_index_mapping {
 	char key[CONFIGURATION_KEY_MAX];
 	int index;
 } t_configuration_index_mapping;
-extern t_configuration_index_mapping configuration_mappings[CONFIGURATION_ITEMS_MAX];
-
 
 extern char configdir[256];
 extern int configdirok;
@@ -44,6 +42,7 @@ typedef struct s_configuration {
 	int saved;
 	int num_items;
 	t_config_item items[CONFIGURATION_ITEMS_MAX];
+	t_configuration_index_mapping mappings[CONFIGURATION_ITEMS_MAX];
 } t_configuration;
 
 extern t_configuration configuration;

@@ -16,7 +16,6 @@ char configuration_filename[32] = "configuration.ini";
 char configdir[256] = "config"; //default config dir name
 int configdirok = 0;
 
-t_configuration_index_mapping configuration_mappings[CONFIGURATION_ITEMS_MAX] = {};
 t_configuration configuration = {};
 
 #define CONFIGURATION_ERROR_MSG_LEN 128
@@ -135,7 +134,7 @@ int configuration_init_indexes(t_configuration_index_mapping mappings[CONFIGURAT
 	for(int i = 0; i < CONFIGURATION_ITEMS_MAX; i++){
 		if(strnlen(mappings[i].key, CONFIGURATION_KEY_MAX)){
 			if((mappings[i].index < CONFIGURATION_ITEMS_MAX)){
-				configuration_mappings[i] = mappings[i];
+				configuration.mappings[i] = mappings[i];
 				snprintf(configuration.items[mappings[i].index].key, CONFIGURATION_KEY_MAX, "%s", mappings[i].key);
 			}
 			else {
@@ -169,7 +168,7 @@ int configuration_load(){
 	// count mapped items
 	int num_mapped_items = 0;
 	for(int i = 0; i < CONFIGURATION_ITEMS_MAX; i++){
-		if(strnlen(configuration_mappings[i].key, CONFIGURATION_KEY_MAX)){
+		if(strnlen(configuration.mappings[i].key, CONFIGURATION_KEY_MAX)){
 			num_mapped_items++;
 		}
 	}
@@ -209,8 +208,8 @@ int configuration_load(){
 		// if key matches a mapping, insert in mapped position
 		if(num_mapped_items > 0){
 			for(int i = 0; i < num_mapped_items; i++){
-				if(strncmp(configuration_mappings[i].key, tmpkey, CONFIGURATION_KEY_MAX) == 0){
-					insert_index = configuration_mappings[i].index;
+				if(strncmp(configuration.mappings[i].key, tmpkey, CONFIGURATION_KEY_MAX) == 0){
+					insert_index = configuration.mappings[i].index;
 				}
 			}
 		}

@@ -1,0 +1,5 @@
+example
+*.o
+*.swp
+test/test_configuration
+test/fixtures/test_configuration_saved.ini
