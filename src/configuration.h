@@ -4,10 +4,6 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
-// directory to contain configuration file(s)
-extern char configuration_dirname[32];
-// name of configuration file
-extern char configuration_filename[32];
 
 // TODO: support multiple configuration files
 
@@ -35,7 +31,13 @@ typedef struct s_config_item {
 	} val;
 } t_config_item;
 
+#define CONFIGURATION_ERROR_MSG_LEN 128
+
 typedef struct s_configuration {
+	// directory to contain configuration file(s)
+	char dirname[32];
+	// name of configuration file
+	char filename[32];
 	char configdir[256];
 	int configdirok;
 	int loaded;
@@ -43,6 +45,7 @@ typedef struct s_configuration {
 	int num_items;
 	t_config_item items[CONFIGURATION_ITEMS_MAX];
 	t_configuration_index_mapping mappings[CONFIGURATION_ITEMS_MAX];
+	char error_msg[CONFIGURATION_ERROR_MSG_LEN];
 } t_configuration;
 
 extern t_configuration configuration;

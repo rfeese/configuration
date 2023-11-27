@@ -61,14 +61,14 @@ void test_configuration_init(){
 	configuration.configdirok = 0;
 	setenv("XDG_CONFIG_HOME", "./fixtures", 1);
 	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_init("configurationtest","configurationtest.ini"), "Configuration init with XDG_CONFIG_HOME should succeed.");
-	TEST_ASSERT_EQUAL_STRING_MESSAGE("./fixtures/configurationtest", configuration.configdir, "configuration_dirname should have been set by XDG_CONFIG_HOME.");
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("./fixtures/configurationtest", configuration.configdir, "configuration.dirname should have been set by XDG_CONFIG_HOME.");
 
 	// test usage of HOME
 	configuration.configdirok = 0;
 	unsetenv("XDG_CONFIG_HOME");
 	setenv("HOME", "./fixtures", 1);
 	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_init("configurationtest","configurationtest.ini"), "Configuration init with HOME should succeed.");
-	TEST_ASSERT_EQUAL_STRING_MESSAGE("./fixtures/.config/configurationtest", configuration.configdir, "configuration_dirname should have been set by HOME.");
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("./fixtures/.config/configurationtest", configuration.configdir, "configuration.dirname should have been set by HOME.");
 
 	TEST_ASSERT_EQUAL_INT_MESSAGE(0, configuration.num_items, "number of items should b zero after init.");
 }
@@ -94,7 +94,7 @@ void test_configuration_init_indexes(){
 }
 
 void test_configuration_load(){
-	strncpy(configuration_filename, "test_configuration.ini", 32);
+	strncpy(configuration.filename, "test_configuration.ini", 32);
 	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_load(), "Configuration should have been loaded.");
 	TEST_ASSERT_EQUAL_INT_MESSAGE(8, configuration.num_items, "Number of configuration items should have been eight.");
 	TEST_ASSERT_EQUAL_STRING_MESSAGE("one", configuration.items[0].key, "Configuration one should have been in first configuration slot.");
@@ -119,7 +119,7 @@ void test_configuration_load(){
 }
 
 void test_configuration_save(){
-	strncpy(configuration_filename, "test_configuration_saved.ini", 32);
+	strncpy(configuration.filename, "test_configuration_saved.ini", 32);
 	strncpy(configuration.items[0].key, "test1", 32);
 	configuration.items[0].val.int_value = 1;
 	strncpy(configuration.items[1].key, "test2", 32);

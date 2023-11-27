@@ -10,13 +10,7 @@
 #include <direct.h> /* for _mkdir */
 #endif
 
-char configuration_dirname[32] = "configuration";
-char configuration_filename[32] = "configuration.ini";
-
-t_configuration configuration = { .configdir = "config" };
-
-#define CONFIGURATION_ERROR_MSG_LEN 128
-char configuration_error_msg[CONFIGURATION_ERROR_MSG_LEN] = {};
+t_configuration configuration = { .dirname = "configuration", .filename = "configuration.ini", .configdir = "config" };
 
 
 //---------------------------------------------------------------------------
@@ -35,7 +29,7 @@ int _configdir_init(int create_configdir){
 	char *xdg_config = getenv("XDG_CONFIG_HOME");
 	if(xdg_config != NULL){
 		if(strlen(xdg_config) > sizeof(config_base)){
-			snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "Your XDG config path is too long for me to use.");
+			snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Your XDG config path is too long for me to use.");
 		}
 		else{
 			snprintf(config_base, sizeof(config_base), "%s", xdg_config);
@@ -47,14 +41,14 @@ int _configdir_init(int create_configdir){
 		/* find HOME directory */
 		char *homedir = getenv("HOME");
 		if(homedir == NULL){
-			snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "Unable to find HOME directory for configuration.");
+			snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Unable to find HOME directory for configuration.");
 			printf("Unable to find HOME directory for configuration.\n");
 			//exit?
 			configuration.configdirok = 0;
 		}
 		else{
 			if(strlen(homedir) + strlen("/.config")  > sizeof(config_base)){
-				snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN,"Your XDG config path is too long for me to use.");
+				snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN,"Your XDG config path is too long for me to use.");
 			}
 			else{
 				snprintf(config_base, sizeof(config_base), "%s/.config", homedir);
@@ -68,7 +62,7 @@ int _configdir_init(int create_configdir){
 #else
 						if(mkdir(config_base, 0755) != 0){
 #endif
-							snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "Unable to create HOME./config configuration directory %s.", config_base);
+							snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Unable to create HOME./config configuration directory %s.", config_base);
 							configuration.configdirok = 0;
 							return 0;
 						}
@@ -79,12 +73,12 @@ int _configdir_init(int create_configdir){
 	}
 
 	if(strlen(config_base) > 0){
-		if(strlen(config_base) + strlen("/") + strlen(configuration_dirname) > sizeof(configuration.configdir)){
-			snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "Your config directory path is too long for me to use.");
+		if(strlen(config_base) + strlen("/") + strlen(configuration.dirname) > sizeof(configuration.configdir)){
+			snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Your config directory path is too long for me to use.");
 			printf("Your config directory path is too long for me to use.\n");
 			return 0;
 		}
-		snprintf(configuration.configdir, sizeof(configuration.configdir), "%s/%s", config_base, configuration_dirname);
+		snprintf(configuration.configdir, sizeof(configuration.configdir), "%s/%s", config_base, configuration.dirname);
 	}
 #endif
 
@@ -95,7 +89,7 @@ int _configdir_init(int create_configdir){
 	}
 	else{ //create, if requested
 		if(!create_configdir){
-			snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "Configuration directory does not exist and not created (as requested).");
+			snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Configuration directory does not exist and not created (as requested).");
 			return 0;
 		}
 #ifdef WIN32
@@ -106,7 +100,7 @@ int _configdir_init(int create_configdir){
 			configuration.configdirok = 1;
 		}
 		else{
-			snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "Unable to create configuration directory %s.", configuration.configdir);
+			snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Unable to create configuration directory %s.", configuration.configdir);
 			configuration.configdirok = 0;
 			return 0;
 		}
@@ -122,8 +116,8 @@ int configuration_init(char config_dirname[], char config_filename[]){
 	if(!strlen(config_filename)){
 		return 0;
 	}
-	snprintf(configuration_dirname, 32, "%s", config_dirname);
-	snprintf(configuration_filename, 32, "%s", config_filename);
+	snprintf(configuration.dirname, 32, "%s", config_dirname);
+	snprintf(configuration.filename, 32, "%s", config_filename);
 	return _configdir_init(1);
 }
 //---------------------------------------------------------------------------
@@ -135,7 +129,7 @@ int configuration_init_indexes(t_configuration_index_mapping mappings[CONFIGURAT
 				snprintf(configuration.items[mappings[i].index].key, CONFIGURATION_KEY_MAX, "%s", mappings[i].key);
 			}
 			else {
-				snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "Invalid mapping to index %d.", mappings[i].index);
+				snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Invalid mapping to index %d.", mappings[i].index);
 				printf("Invalid configuration mapping to %d.\n", mappings[i].index);
 			}
 		}
@@ -158,7 +152,7 @@ int configuration_load(){
 	}
 
 	char fqconfigname[288]; // configdir + configfile
-	snprintf(fqconfigname, sizeof(fqconfigname), "%s/%s", configuration.configdir, configuration_filename);
+	snprintf(fqconfigname, sizeof(fqconfigname), "%s/%s", configuration.configdir, configuration.filename);
 
 	// init configuration
 	configuration.num_items = 0;
@@ -175,7 +169,7 @@ int configuration_load(){
 	FILE *configfile = NULL;
 	configfile = fopen(fqconfigname, "r");
 	if(!configfile){
-		snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "Unable to open configfile.");
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Unable to open configfile.");
 		return 0;
 	}
 
@@ -261,11 +255,11 @@ int configuration_save(){
 		return 0;
 	}
 
-	snprintf(fqconfigname, sizeof(fqconfigname), "%s/%s", configuration.configdir, configuration_filename);
+	snprintf(fqconfigname, sizeof(fqconfigname), "%s/%s", configuration.configdir, configuration.filename);
 	configfile = fopen(fqconfigname, "w");
 
 	if(configfile == NULL){
-		snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "Unable to open configfile for save.");
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Unable to open configfile for save.");
 		printf("Unable to open configfile for save.\n");
 		return 0;
 	}
@@ -291,7 +285,7 @@ int configuration_save(){
 //---------------------------------------------------------------------------
 int configuration_get_by_index_int_value(const int index){
 	if(index >= CONFIGURATION_ITEMS_MAX){
-		snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "Index out of bounds.");
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Index out of bounds.");
 		printf("ERROR: index >= CONFIGURATION_ITEMS_MAX.\n");
 	}
 
@@ -307,7 +301,7 @@ int configuration_get_int_value(const char *key){
 				return configuration.items[i].val.int_value;
 			}
 			else {
-				snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "conf value type is not int for %s.", key);
+				snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "conf value type is not int for %s.", key);
 				printf("ERROR: conf value type is not int for %s.\n", key);
 			}
 		}
@@ -319,7 +313,7 @@ int configuration_get_int_value(const char *key){
 //---------------------------------------------------------------------------
 void configuration_set_by_index_int_value(const int index, int value){
 	if(index >= CONFIGURATION_ITEMS_MAX){
-		snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "Index out of bounds.");
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Index out of bounds.");
 		printf("ERROR: index >= CONFIGURATION_ITEMS_MAX.\n");
 	}
 
@@ -340,7 +334,7 @@ void configuration_set_int_value(const char *key, int value){
 	}
 
 	if(i >= CONFIGURATION_ITEMS_MAX){
-		snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "No more space in configuration.");
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "No more space in configuration.");
 		printf("ERROR: no more space in configuration.\n");
 		return;
 	}
@@ -357,7 +351,7 @@ void configuration_set_int_value(const char *key, int value){
 //---------------------------------------------------------------------------
 float configuration_get_by_index_float_value(const int index){
 	if(index >= CONFIGURATION_ITEMS_MAX){
-		snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "Index out of bounds.");
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Index out of bounds.");
 		printf("ERROR: index >= CONFIGURATION_ITEMS_MAX.\n");
 		return 0;
 	}
@@ -374,7 +368,7 @@ float configuration_get_float_value(const char *key){
 				return configuration.items[i].val.float_value;
 			}
 			else {
-				snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "conf value type is not float for %s.", key);
+				snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "conf value type is not float for %s.", key);
 				printf("ERROR: conf value type is not float for %s.\n", key);
 			}
 		}
@@ -387,7 +381,7 @@ float configuration_get_float_value(const char *key){
 void configuration_set_by_index_float_value(const int index, float value){
 
 	if(index >= CONFIGURATION_ITEMS_MAX){
-		snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "Index out of bounds.");
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Index out of bounds.");
 		printf("ERROR: index >= CONFIGURATION_ITEMS_MAX.\n");
 		return;
 	}
@@ -409,7 +403,7 @@ void configuration_set_float_value(const char *key, float value){
 	}
 
 	if(i >= CONFIGURATION_ITEMS_MAX){
-		snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "No more space in configuration.");
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "No more space in configuration.");
 		printf("ERROR: no more space in configuration.\n");
 		return;
 	}
@@ -427,7 +421,7 @@ void configuration_set_float_value(const char *key, float value){
 const char *configuration_get_by_index_str_value(const int index){
 
 	if(index >= CONFIGURATION_ITEMS_MAX){
-		snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "Index out of bounds.");
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Index out of bounds.");
 		printf("ERROR: index >= CONFIGURATION_ITEMS_MAX.\n");
 		return "";
 	}
@@ -444,7 +438,7 @@ const char *configuration_get_str_value(const char *key){
 				return configuration.items[i].val.str_value;
 			}
 			else {
-				snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "Conf value type is not str for %s.", key);
+				snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Conf value type is not str for %s.", key);
 				printf("ERROR: conf value type is not str for %s.\n", key);
 			}
 		}
@@ -457,7 +451,7 @@ const char *configuration_get_str_value(const char *key){
 void configuration_set_by_index_str_value(const int index, const char *value){
 
 	if(index >= CONFIGURATION_ITEMS_MAX){
-		snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "Index out of bounds.");
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Index out of bounds.");
 		printf("ERROR: index >= CONFIGURATION_ITEMS_MAX.\n");
 		return;
 	}
@@ -479,7 +473,7 @@ void configuration_set_str_value(const char *key, const char *value){
 	}
 
 	if(i >= CONFIGURATION_ITEMS_MAX){
-		snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "No more space in configuration.");
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "No more space in configuration.");
 		printf("ERROR: no more space in configuration.\n");
 		return;
 	}
@@ -495,6 +489,6 @@ void configuration_set_str_value(const char *key, const char *value){
 }
 //---------------------------------------------------------------------------
 char *configuration_get_error(){
-	return configuration_error_msg;
+	return configuration.error_msg;
 }
 //---------------------------------------------------------------------------
