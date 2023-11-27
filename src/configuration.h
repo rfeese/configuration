@@ -22,8 +22,6 @@ typedef struct configuration_index_mapping {
 	int index;
 } t_configuration_index_mapping;
 
-extern char configdir[256];
-extern int configdirok;
 
 typedef enum config_val_type { CONFIGURATION_VAL_INT, CONFIGURATION_VAL_FLOAT, CONFIGURATION_VAL_STR } t_conf_val_type;
 
@@ -38,6 +36,8 @@ typedef struct s_config_item {
 } t_config_item;
 
 typedef struct s_configuration {
+	char configdir[256];
+	int configdirok;
 	int loaded;
 	int saved;
 	int num_items;

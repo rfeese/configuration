@@ -13,10 +13,7 @@
 char configuration_dirname[32] = "configuration";
 char configuration_filename[32] = "configuration.ini";
 
-char configdir[256] = "config"; //default config dir name
-int configdirok = 0;
-
-t_configuration configuration = {};
+t_configuration configuration = { .configdir = "config" };
 
 #define CONFIGURATION_ERROR_MSG_LEN 128
 char configuration_error_msg[CONFIGURATION_ERROR_MSG_LEN] = {};
@@ -25,7 +22,7 @@ char configuration_error_msg[CONFIGURATION_ERROR_MSG_LEN] = {};
 //---------------------------------------------------------------------------
 int _configdir_init(int create_configdir){
 
-	if(configdirok){
+	if(configuration.configdirok){
 		return 1;
 	}
 
@@ -53,7 +50,7 @@ int _configdir_init(int create_configdir){
 			snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "Unable to find HOME directory for configuration.");
 			printf("Unable to find HOME directory for configuration.\n");
 			//exit?
-			configdirok = 0;
+			configuration.configdirok = 0;
 		}
 		else{
 			if(strlen(homedir) + strlen("/.config")  > sizeof(config_base)){
@@ -72,7 +69,7 @@ int _configdir_init(int create_configdir){
 						if(mkdir(config_base, 0755) != 0){
 #endif
 							snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "Unable to create HOME./config configuration directory %s.", config_base);
-							configdirok = 0;
+							configuration.configdirok = 0;
 							return 0;
 						}
 					}
@@ -82,19 +79,19 @@ int _configdir_init(int create_configdir){
 	}
 
 	if(strlen(config_base) > 0){
-		if(strlen(config_base) + strlen("/") + strlen(configuration_dirname) > sizeof(configdir)){
+		if(strlen(config_base) + strlen("/") + strlen(configuration_dirname) > sizeof(configuration.configdir)){
 			snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "Your config directory path is too long for me to use.");
 			printf("Your config directory path is too long for me to use.\n");
 			return 0;
 		}
-		snprintf(configdir, sizeof(configdir), "%s/%s", config_base, configuration_dirname);
+		snprintf(configuration.configdir, sizeof(configuration.configdir), "%s/%s", config_base, configuration_dirname);
 	}
 #endif
 
 	//create dir if it doesn't exist
 	struct stat st;
-	if(stat(configdir, &st) == 0){
-		configdirok = 1; //found
+	if(stat(configuration.configdir, &st) == 0){
+		configuration.configdirok = 1; //found
 	}
 	else{ //create, if requested
 		if(!create_configdir){
@@ -102,15 +99,15 @@ int _configdir_init(int create_configdir){
 			return 0;
 		}
 #ifdef WIN32
-		if(_mkdir(configdir) == 0){
+		if(_mkdir(configuration.configdir) == 0){
 #else
-		if(mkdir(configdir, 0755) == 0){
+		if(mkdir(configuration.configdir, 0755) == 0){
 #endif
-			configdirok = 1;
+			configuration.configdirok = 1;
 		}
 		else{
-			snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "Unable to create configuration directory %s.", configdir);
-			configdirok = 0;
+			snprintf(configuration_error_msg, CONFIGURATION_ERROR_MSG_LEN, "Unable to create configuration directory %s.", configuration.configdir);
+			configuration.configdirok = 0;
 			return 0;
 		}
 	}
@@ -151,7 +148,7 @@ int configuration_load(){
 	_configdir_init(0);
 
 	//can't load if configdir not ok
-	if(!configdirok){
+	if(!configuration.configdirok){
 		return 0;
 	}
 
@@ -161,7 +158,7 @@ int configuration_load(){
 	}
 
 	char fqconfigname[288]; // configdir + configfile
-	snprintf(fqconfigname, sizeof(fqconfigname), "%s/%s", configdir, configuration_filename);
+	snprintf(fqconfigname, sizeof(fqconfigname), "%s/%s", configuration.configdir, configuration_filename);
 
 	// init configuration
 	configuration.num_items = 0;
@@ -259,12 +256,12 @@ int configuration_save(){
 
 	_configdir_init(1);
 
-	//configdirok?
-	if(!configdirok){
+	//configuration.configdirok?
+	if(!configuration.configdirok){
 		return 0;
 	}
 
-	snprintf(fqconfigname, sizeof(fqconfigname), "%s/%s", configdir, configuration_filename);
+	snprintf(fqconfigname, sizeof(fqconfigname), "%s/%s", configuration.configdir, configuration_filename);
 	configfile = fopen(fqconfigname, "w");
 
 	if(configfile == NULL){

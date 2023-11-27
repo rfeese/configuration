@@ -28,8 +28,8 @@ void setUp(void){
 
 	reset_configuration();
 
-	strncpy(configdir, "fixtures", 256);
-	configdirok = 1;
+	strncpy(configuration.configdir, "fixtures", 256);
+	configuration.configdirok = 1;
 }
 
 //runs after each test
@@ -50,7 +50,7 @@ void tearDown(void){
 		// unset if env did not exist previously
 		unsetenv("HOME");
 	}
-	// configdirok = 0;
+	// configuration.configdirok = 0;
 }
 
 void test_configuration_init(){
@@ -58,17 +58,17 @@ void test_configuration_init(){
 	TEST_ASSERT_EQUAL_INT_MESSAGE(0, configuration_init("fail",""), "Configuration init for empty filename should fail.");
 
 	// test usage of XDG_CONFIG_HOME
-	configdirok = 0;
+	configuration.configdirok = 0;
 	setenv("XDG_CONFIG_HOME", "./fixtures", 1);
 	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_init("configurationtest","configurationtest.ini"), "Configuration init with XDG_CONFIG_HOME should succeed.");
-	TEST_ASSERT_EQUAL_STRING_MESSAGE("./fixtures/configurationtest", configdir, "configuration_dirname should have been set by XDG_CONFIG_HOME.");
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("./fixtures/configurationtest", configuration.configdir, "configuration_dirname should have been set by XDG_CONFIG_HOME.");
 
 	// test usage of HOME
-	configdirok = 0;
+	configuration.configdirok = 0;
 	unsetenv("XDG_CONFIG_HOME");
 	setenv("HOME", "./fixtures", 1);
 	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_init("configurationtest","configurationtest.ini"), "Configuration init with HOME should succeed.");
-	TEST_ASSERT_EQUAL_STRING_MESSAGE("./fixtures/.config/configurationtest", configdir, "configuration_dirname should have been set by HOME.");
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("./fixtures/.config/configurationtest", configuration.configdir, "configuration_dirname should have been set by HOME.");
 
 	TEST_ASSERT_EQUAL_INT_MESSAGE(0, configuration.num_items, "number of items should b zero after init.");
 }
