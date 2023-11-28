@@ -5,8 +5,6 @@
 #define CONFIGURATION_H
 
 
-// TODO: support multiple configuration files
-
 /* TODO: make config items array automatically expandable */
 #define CONFIGURATION_ITEMS_MAX 128
 #define CONFIGURATION_VAL_STR_LEN	33
@@ -50,10 +48,6 @@ typedef struct s_configuration {
 
 extern t_configuration configuration;
 
-// TODO: Allow explicit config directory/file specification
-// TODO: Allow loading more than one config file
-// 	- make configuration struct user-defined
-// 	- configuration-struct argument to all methods
 int configuration_init(char config_dirname[], char config_filename[]);
 int configuration_init_indexes(t_configuration_index_mapping mappings[CONFIGURATION_ITEMS_MAX]);
 int configuration_load();
