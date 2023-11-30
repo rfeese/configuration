@@ -168,6 +168,14 @@ void test_configuration_save(){
 	TEST_ASSERT_FLOAT_WITHIN_MESSAGE(0.001f, 1.234f, configuration.items[6].val.float_value, "testfloat1 should have had value 1.234.");
 }
 
+void test_configuration_get_configdir(){
+	configuration.configdirok = 0;
+	snprintf(configuration.configdir, 256, "testdir1");
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("", configuration_get_configdir(), "Configdir should be empty if configdir not ok.");
+	configuration.configdirok = 1;
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("testdir1", configuration_get_configdir(), "Configdir should be returned.");
+}
+
 void test_configuration_set_by_index_int_value(){
 	configuration_set_by_index_int_value(0, 1);
 	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration.items[0].val.int_value, "configuration item at index 0 should have been set to 1.");
@@ -298,6 +306,7 @@ int main(){
 	RUN_TEST(test_configuration_init_indexes);
 	RUN_TEST(test_configuration_load);
 	RUN_TEST(test_configuration_save);
+	RUN_TEST(test_configuration_get_configdir);
 	RUN_TEST(test_configuration_set_by_index_int_value);
 	RUN_TEST(test_configuration_set_int_value);
 	RUN_TEST(test_configuration_get_by_index_int_value);

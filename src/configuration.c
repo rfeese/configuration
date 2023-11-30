@@ -283,6 +283,13 @@ int configuration_save(){
 	return 1;	
 }
 //---------------------------------------------------------------------------
+char * configuration_get_configdir(){
+	if(!configuration.configdirok){
+		return "";
+	}
+	return configuration.configdir;
+}
+//---------------------------------------------------------------------------
 int configuration_get_by_index_int_value(const int index){
 	if(index >= CONFIGURATION_ITEMS_MAX){
 		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Index out of bounds.");

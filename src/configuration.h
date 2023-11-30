@@ -52,6 +52,7 @@ int configuration_init(char config_dirname[], char config_filename[]);
 int configuration_init_indexes(t_configuration_index_mapping mappings[CONFIGURATION_ITEMS_MAX]);
 int configuration_load();
 int configuration_save();
+char * configuration_get_configdir();
 
 int configuration_get_by_index_int_value(const int index);
 int configuration_get_int_value(const char *key);
