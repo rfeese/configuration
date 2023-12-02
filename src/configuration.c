@@ -118,6 +118,7 @@ int configuration_init(char config_dirname[], char config_filename[]){
 	}
 	snprintf(configuration.dirname, 32, "%s", config_dirname);
 	snprintf(configuration.filename, 32, "%s", config_filename);
+	snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "");
 	return _configdir_init(1);
 }
 //---------------------------------------------------------------------------
@@ -283,56 +284,76 @@ int configuration_save(){
 	return 1;	
 }
 //---------------------------------------------------------------------------
-char * configuration_get_configdir(){
+const char * configuration_get_configdir(){
 	if(!configuration.configdirok){
 		return "";
 	}
 	return configuration.configdir;
 }
 //---------------------------------------------------------------------------
-int configuration_get_by_index_int_value(const int index){
-	if(index >= CONFIGURATION_ITEMS_MAX){
-		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Index out of bounds.");
-		printf("ERROR: index >= CONFIGURATION_ITEMS_MAX.\n");
+int configuration_get_by_index_int_value(const int index, int *value){
+	if(!value){
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Value is null.");
+		return 0;
 	}
 
-	return configuration.items[index].val.int_value;
+	if(index >= CONFIGURATION_ITEMS_MAX){
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Configuration index out of bounds.");
+		value = 0;
+		return 0;
+	}
+
+	if(configuration.items[index].val_type != CONFIGURATION_VAL_INT){
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Configuration item is not of type int.");
+		value = 0;
+		return 0;
+	}
+
+	*value = configuration.items[index].val.int_value;
+	return 1;
 }
 //---------------------------------------------------------------------------
-int configuration_get_int_value(const char *key){
-	int i = 0;
+int configuration_get_int_value(const char *key, int *value){
+	if(!value){
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Value is null.");
+		return 0;
+	}
 
-	for(i = 0; i < configuration.num_items; i++){
+	for(int i = 0; i < configuration.num_items; i++){
 		if(strcmp(configuration.items[i].key, key) == 0){
-			if(configuration.items[i].val_type == CONFIGURATION_VAL_INT){
-				return configuration.items[i].val.int_value;
+			if(configuration.items[i].val_type != CONFIGURATION_VAL_INT){
+				snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Configuration item is not of type int.");
+				value = 0;
+				return 0;
 			}
-			else {
-				snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "conf value type is not int for %s.", key);
-				printf("ERROR: conf value type is not int for %s.\n", key);
-			}
+			*value = configuration.items[i].val.int_value;
+			return 1;
 		}
 	}
 
 	//not found
-	return -1;
+	snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Configuration key %s not found.", key);
+	*value = 0;
+	return 0;
 }
 //---------------------------------------------------------------------------
-void configuration_set_by_index_int_value(const int index, int value){
+int configuration_set_by_index_int_value(const int index, int value){
 	if(index >= CONFIGURATION_ITEMS_MAX){
-		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Index out of bounds.");
-		printf("ERROR: index >= CONFIGURATION_ITEMS_MAX.\n");
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Configuration index %d out of bounds.", index);
+		return 0;
 	}
 
 	configuration.items[index].val_type = CONFIGURATION_VAL_INT;
 	configuration.items[index].val.int_value = value;
 	configuration.saved = 0;
+	return 1;
 }
 //---------------------------------------------------------------------------
-void configuration_set_int_value(const char *key, int value){
-	int i = 0;
-	int key_found = 0;
+int configuration_set_int_value(const char *key, int value){
 
+	// try to find existing key
+	int key_found = 0;
+	int i = 0;
 	for(i = 0; i < configuration.num_items; i++){
 		if(strcmp(configuration.items[i].key, key) == 0){
 			key_found = 1;
@@ -343,7 +364,7 @@ void configuration_set_int_value(const char *key, int value){
 	if(i >= CONFIGURATION_ITEMS_MAX){
 		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "No more space in configuration.");
 		printf("ERROR: no more space in configuration.\n");
-		return;
+		return 0;
 	}
 
 	if(!key_found){ //add new item
@@ -354,54 +375,71 @@ void configuration_set_int_value(const char *key, int value){
 	configuration.items[i].val_type = CONFIGURATION_VAL_INT;
 	configuration.items[i].val.int_value = value;
 	configuration.saved = 0;
+	return 1;
 }
 //---------------------------------------------------------------------------
-float configuration_get_by_index_float_value(const int index){
-	if(index >= CONFIGURATION_ITEMS_MAX){
-		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Index out of bounds.");
-		printf("ERROR: index >= CONFIGURATION_ITEMS_MAX.\n");
+int configuration_get_by_index_float_value(const int index, float *value){
+	if(!value){
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Value is null.");
 		return 0;
 	}
 
-	return configuration.items[index].val.float_value;
+	if(index >= CONFIGURATION_ITEMS_MAX){
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Configuration index %d out of bounds.", index);
+		return 0;
+	}
+
+	if(configuration.items[index].val_type != CONFIGURATION_VAL_FLOAT){
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Configuration item is not of type float.");
+		*value = 0.0f;
+		return 0;
+	}
+	
+	*value = configuration.items[index].val.float_value;
+	return 1;
 }
 //---------------------------------------------------------------------------
-float configuration_get_float_value(const char *key){
-	int i = 0;
+int configuration_get_float_value(const char *key, float *value){
+	if(!value){
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Value is null.");
+		return 0;
+	}
 
-	for(i = 0; i < configuration.num_items; i++){
+	for(int i = 0; i < configuration.num_items; i++){
 		if(strcmp(configuration.items[i].key, key) == 0){
-			if(configuration.items[i].val_type == CONFIGURATION_VAL_FLOAT){
-				return configuration.items[i].val.float_value;
+			if(configuration.items[i].val_type != CONFIGURATION_VAL_FLOAT){
+				snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Configuration item is not of type float.");
+				*value = 0.0f;
+				return 0;
 			}
-			else {
-				snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "conf value type is not float for %s.", key);
-				printf("ERROR: conf value type is not float for %s.\n", key);
-			}
+
+			*value = configuration.items[i].val.float_value;
+			return 1;
 		}
 	}
 
 	//not found
-	return -1;
+	snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Configuration key %s not found.", key);
+	*value = 0.0f;
+	return 0;
 }
 //---------------------------------------------------------------------------
-void configuration_set_by_index_float_value(const int index, float value){
+int configuration_set_by_index_float_value(const int index, float value){
 
 	if(index >= CONFIGURATION_ITEMS_MAX){
-		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Index out of bounds.");
-		printf("ERROR: index >= CONFIGURATION_ITEMS_MAX.\n");
-		return;
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Configuration index %d out of bounds.", index);
+		return 0;
 	}
 
 	configuration.items[index].val_type = CONFIGURATION_VAL_FLOAT;
 	configuration.items[index].val.float_value = value;
 	configuration.saved = 0;
+	return 1;
 }
 //---------------------------------------------------------------------------
-void configuration_set_float_value(const char *key, float value){
-	int i = 0;
+int configuration_set_float_value(const char *key, float value){
 	int key_found = 0;
-
+	int i = 0;
 	for(i = 0; i < configuration.num_items; i++){
 		if(strcmp(configuration.items[i].key, key) == 0){
 			key_found = 1;
@@ -412,7 +450,7 @@ void configuration_set_float_value(const char *key, float value){
 	if(i >= CONFIGURATION_ITEMS_MAX){
 		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "No more space in configuration.");
 		printf("ERROR: no more space in configuration.\n");
-		return;
+		return 0;
 	}
 
 	if(!key_found){ //add new item
@@ -423,55 +461,63 @@ void configuration_set_float_value(const char *key, float value){
 	configuration.items[i].val_type = CONFIGURATION_VAL_FLOAT;
 	configuration.items[i].val.float_value = value;
 	configuration.saved = 0;
+	return 1;
 }
 //---------------------------------------------------------------------------
-const char *configuration_get_by_index_str_value(const int index){
+int configuration_get_by_index_str_value(const int index, char **value){
+	if(!value){
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Value is null.");
+		return 0;
+	}
+
 
 	if(index >= CONFIGURATION_ITEMS_MAX){
 		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Index out of bounds.");
-		printf("ERROR: index >= CONFIGURATION_ITEMS_MAX.\n");
-		return "";
+		return 0;
 	}
-
-	return configuration.items[index].val.str_value;
+ 
+	*value = &configuration.items[index].val.str_value[0];
+	return 1;
 }
 //---------------------------------------------------------------------------
-const char *configuration_get_str_value(const char *key){
-	int i = 0;
+int configuration_get_str_value(const char *key, char **value){
+	if(!value){
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Value is null.");
+		return 0;
+	}
 
-	for(i = 0; i < configuration.num_items; i++){
+	for(int i = 0; i < configuration.num_items; i++){
 		if(strcmp(configuration.items[i].key, key) == 0){
-			if(configuration.items[i].val_type == CONFIGURATION_VAL_STR){
-				return configuration.items[i].val.str_value;
+			if(configuration.items[i].val_type != CONFIGURATION_VAL_STR){
+				snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Configuration item is not of type str.");
+				return 0;
 			}
-			else {
-				snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Conf value type is not str for %s.", key);
-				printf("ERROR: conf value type is not str for %s.\n", key);
-			}
+			*value = &configuration.items[i].val.str_value[0];
+			return 1;
 		}
 	}
 
 	//not found
-	return "";
+	snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Configuration key %s not found.", key);
+	return 0;
 }
 //---------------------------------------------------------------------------
-void configuration_set_by_index_str_value(const int index, const char *value){
+int configuration_set_by_index_str_value(const int index, const char *value){
 
 	if(index >= CONFIGURATION_ITEMS_MAX){
-		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Index out of bounds.");
-		printf("ERROR: index >= CONFIGURATION_ITEMS_MAX.\n");
-		return;
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Configuration index %d out of bounds.", index);
+		return 0;
 	}
 
 	configuration.items[index].val_type = CONFIGURATION_VAL_STR;
 	snprintf(configuration.items[index].val.str_value, CONFIGURATION_VAL_STR_LEN, "%s", value);
 	configuration.saved = 0;
+	return 1;
 }
 //---------------------------------------------------------------------------
-void configuration_set_str_value(const char *key, const char *value){
-	int i = 0;
+int configuration_set_str_value(const char *key, const char *value){
 	int key_found = 0;
-
+	int i = 0;
 	for(i = 0; i < configuration.num_items; i++){
 		if(strcmp(configuration.items[i].key, key) == 0){
 			key_found = 1;
@@ -482,7 +528,7 @@ void configuration_set_str_value(const char *key, const char *value){
 	if(i >= CONFIGURATION_ITEMS_MAX){
 		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "No more space in configuration.");
 		printf("ERROR: no more space in configuration.\n");
-		return;
+		return 0;
 	}
 
 	if(!key_found){ //add new item
@@ -493,9 +539,10 @@ void configuration_set_str_value(const char *key, const char *value){
 	configuration.items[i].val_type = CONFIGURATION_VAL_STR;
 	snprintf(configuration.items[i].val.str_value, CONFIGURATION_VAL_STR_LEN, "%s", value);
 	configuration.saved = 0;
+	return 1;
 }
 //---------------------------------------------------------------------------
-char *configuration_get_error(){
+const char *configuration_get_error(){
 	return configuration.error_msg;
 }
 //---------------------------------------------------------------------------

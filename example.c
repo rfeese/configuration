@@ -5,11 +5,16 @@
 #include <stdlib.h>
 #include "src/configuration.h"
 
+// use X function to define configuration mapping indexes
 # define CONFIGS \
-	X(CONFIG_SETTING1, "setting1") \
+	X(CONFIG_TIMES_EXECUTED, "times_executed") \
 	X(CONFIG_SETTING2, "setting2") \
 	X(CONFIG_SETTING3, "setting3") \
-	X(CONFIG_SETTING4, "setting4") 
+	X(CONFIG_SETTING4, "setting4") \
+	X(CONFIG_SETTING5, "setting5") \
+	X(CONFIG_SETTING6, "setting6") \
+	X(CONFIG_SETTING7, "setting7") \
+	X(CONFIG_SETTING8, "setting8")
 
 #define X(a,b) a,
 enum configs {
@@ -38,11 +43,19 @@ int main(int argc, char* argv[]){
 	}
 
 	// update configuration values
-	int setting1 = configuration_get_by_index_int_value(CONFIG_SETTING1);
-	configuration_set_by_index_int_value(CONFIG_SETTING1, ++setting1);
+	int times_executed = 0;
+	if(!configuration_get_by_index_int_value(CONFIG_TIMES_EXECUTED, &times_executed)){
+		printf("Error accessing configuration: %s\n", configuration_get_error());
+	}
+
+	if(!configuration_set_by_index_int_value(CONFIG_TIMES_EXECUTED, ++times_executed)){
+		printf("Error accessing configuration: %s\n", configuration_get_error());
+	}
 
 	// save configuration
-	configuration_save();
+	if(!configuration_save()){
+		printf("Error saving configuration: %s\n", configuration_get_error());
+	}
 
 	return EXIT_SUCCESS;
 }
