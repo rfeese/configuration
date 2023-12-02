@@ -9,6 +9,8 @@
 #define CONFIGURATION_ITEMS_MAX 128
 #define CONFIGURATION_VAL_STR_LEN	33
 
+// TODO: Allow mapping to initialize data type
+// TODO: Allow mapping to initialize data values (defaults)
 // Configuration item key to index mapping
 #define CONFIGURATION_KEY_MAX	33
 typedef struct configuration_index_mapping {
