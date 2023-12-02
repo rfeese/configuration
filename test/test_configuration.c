@@ -28,8 +28,9 @@ void setUp(void){
 
 	reset_configuration();
 
-	strncpy(configuration.configdir, "fixtures", 256);
+	snprintf(configuration.configdir, 256, "fixtures");
 	configuration.configdirok = 1;
+	snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "");
 }
 
 //runs after each test
@@ -204,20 +205,27 @@ void test_configuration_set_int_value(){
 
 void test_configuration_get_by_index_int_value(){
 	configuration.items[0].val.int_value = 1;
-	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_get_by_index_int_value(0), "should have got 1 from index 0.");
+	int val = 0;
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_get_by_index_int_value(0, &val), "should have successfully got index 0.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, val, "should have got 1 from index 0.");
 }
 
 void test_configuration_get_int_value(){
 	reset_configuration();
-	TEST_ASSERT_EQUAL_INT_MESSAGE(-1, configuration_get_int_value("test1"), "test1 should NOT be configured.");
+	int val = 0;
+	TEST_ASSERT_EQUAL_INT_MESSAGE(0, configuration_get_int_value("test1", &val), "test1 should NOT be configured.");
 	strncpy(configuration.items[0].key, "test1", 32);
 	configuration.items[0].val.int_value = 1;
 	configuration.num_items = 1;
-	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_get_int_value("test1"), "test1 should be configured.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_get_int_value("test1", &val), "test1 should be configured.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, val, "val should be 1.");
+
+	int val2 = 0;
 	strncpy(configuration.items[1].key, "test2", 32);
 	configuration.items[1].val.int_value = 1;
 	configuration.num_items = 2;
-	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_get_int_value("test2"), "test2 should be configurationed.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_get_int_value("test2", &val2), "test2 should be configured.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, val2, "val should be 1.");
 }
 
 void test_configuration_set_by_index_float_value(){
@@ -247,23 +255,31 @@ void test_configuration_set_float_value(){
 }
 
 void test_configuration_get_by_index_float_value(){
+	float val = 0.0f;
+	configuration.items[0].val_type = CONFIGURATION_VAL_FLOAT;
 	configuration.items[0].val.float_value = 0.1f;
-	TEST_ASSERT_EQUAL_FLOAT_MESSAGE(0.1f, configuration_get_by_index_float_value(0), "should have got 0.1 from index 0.");
+	TEST_ASSERT_EQUAL_FLOAT_MESSAGE(1, configuration_get_by_index_float_value(0, &val), "should have got value from index 0.");
+	TEST_ASSERT_EQUAL_FLOAT_MESSAGE(0.1f, val, "should have got 0.1 from index 0.");
 }
 
 void test_configuration_get_float_value(){
 	reset_configuration();
-	TEST_ASSERT_EQUAL_INT_MESSAGE(-1, configuration_get_float_value("testfloat1"), "testfloat1 should NOT be configured.");
+	float val = 0.0f;
+	TEST_ASSERT_EQUAL_INT_MESSAGE(0, configuration_get_float_value("testfloat1", &val), "testfloat1 should NOT be configured.");
 	strncpy(configuration.items[0].key, "testfloat1", 32);
 	configuration.items[0].val_type = CONFIGURATION_VAL_FLOAT;
 	configuration.items[0].val.float_value = 1.234f;
 	configuration.num_items = 1;
-	TEST_ASSERT_FLOAT_WITHIN_MESSAGE(0.001f, 1.234f, configuration_get_float_value("testfloat1"), "testfloat1 should be configured.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_get_float_value("testfloat1", &val), "testfloat1 should be configured.");
+	TEST_ASSERT_EQUAL_FLOAT_MESSAGE(1.234f, val, "val should be 1.234.");
+
+	float val2 = 0.0f;
 	strncpy(configuration.items[1].key, "testfloat2", 32);
 	configuration.items[1].val_type = CONFIGURATION_VAL_FLOAT;
 	configuration.items[1].val.float_value = 12.345f;
 	configuration.num_items = 2;
-	TEST_ASSERT_FLOAT_WITHIN_MESSAGE(0.001f, 12.345f, configuration_get_float_value("testfloat2"), "testfloat2 should be configurationed.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_get_float_value("testfloat2", &val2), "testfloat2 should be configurationed.");
+	TEST_ASSERT_EQUAL_FLOAT_MESSAGE(12.345f, val2, "val2 should be 12.345");
 }
 
 void test_configuration_set_by_index_str_value(){
@@ -279,19 +295,24 @@ void test_configuration_set_str_value(){
 }
 
 void test_configuration_get_by_index_str_value(){
+	char *val = NULL;
+	configuration.items[0].val_type = CONFIGURATION_VAL_STR;
 	snprintf(configuration.items[0].val.str_value, CONFIGURATION_VAL_STR_LEN, "%s", "test");
-	TEST_ASSERT_EQUAL_STRING_MESSAGE("test", configuration_get_by_index_str_value(0), "should have got \"test\" from index 0.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_get_by_index_str_value(0, &val), "should have got value from index 0.");
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("test", val, "should have got \"test\"");
 }
 
 void test_configuration_get_str_value(){
 	reset_configuration();
-	TEST_ASSERT_EQUAL_INT_MESSAGE(0, strncmp("", configuration_get_str_value("test1"), CONFIGURATION_VAL_STR_LEN), "test1 should NOT be configured.");
+	char *val = NULL;
+	TEST_ASSERT_EQUAL_INT_MESSAGE(0, configuration_get_str_value("test1", &val), "test1 should NOT be configured.");
 	snprintf(&configuration.items[0].key[0], 32, "%s", "test1");
 	configuration.items[0].val_type = CONFIGURATION_VAL_STR;
 	snprintf(&configuration.items[0].val.str_value[0], CONFIGURATION_VAL_STR_LEN, "%s", "str1");
 	configuration.loaded = 1;
 	configuration.num_items = 1;
-	TEST_ASSERT_EQUAL_INT_MESSAGE(0, strncmp("str1", configuration_get_str_value("test1"), CONFIGURATION_VAL_STR_LEN), "val should be str1");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_get_str_value("test1", &val), "should have got val for test1");
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("str1", val, "val should be str1");
 }
 
 void test_configuration_get_error(){
