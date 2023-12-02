@@ -48,6 +48,8 @@ int main(int argc, char* argv[]){
 		printf("Error accessing configuration: %s\n", configuration_get_error());
 	}
 
+	printf("I've been executed %d times.\n", times_executed);
+
 	if(!configuration_set_by_index_int_value(CONFIG_TIMES_EXECUTED, ++times_executed)){
 		printf("Error accessing configuration: %s\n", configuration_get_error());
 	}
