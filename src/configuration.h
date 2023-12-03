@@ -66,8 +66,8 @@ int configuration_get_float_value(const char *key, float *value);
 int configuration_set_by_index_float_value(const int index, float value);
 int configuration_set_float_value(const char *key, float value);
 
-int configuration_get_by_index_str_value(const int index, char **value);
-int configuration_get_str_value(const char *key, char **value);
+int configuration_get_by_index_str_value(const int index, const char **value);
+int configuration_get_str_value(const char *key, const char **value);
 int configuration_set_by_index_str_value(const int index, const char *value);
 int configuration_set_str_value(const char *key, const char *value);
 

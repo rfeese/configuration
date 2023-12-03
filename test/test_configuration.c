@@ -295,7 +295,7 @@ void test_configuration_set_str_value(){
 }
 
 void test_configuration_get_by_index_str_value(){
-	char *val = NULL;
+	const char *val = NULL;
 	configuration.items[0].val_type = CONFIGURATION_VAL_STR;
 	snprintf(configuration.items[0].val.str_value, CONFIGURATION_VAL_STR_LEN, "%s", "test");
 	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_get_by_index_str_value(0, &val), "should have got value from index 0.");
@@ -304,7 +304,7 @@ void test_configuration_get_by_index_str_value(){
 
 void test_configuration_get_str_value(){
 	reset_configuration();
-	char *val = NULL;
+	const char *val = NULL;
 	TEST_ASSERT_EQUAL_INT_MESSAGE(0, configuration_get_str_value("test1", &val), "test1 should NOT be configured.");
 	snprintf(&configuration.items[0].key[0], 32, "%s", "test1");
 	configuration.items[0].val_type = CONFIGURATION_VAL_STR;
