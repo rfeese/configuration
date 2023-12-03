@@ -291,7 +291,7 @@ const char * configuration_get_configdir(){
 	return configuration.configdir;
 }
 //---------------------------------------------------------------------------
-int configuration_get_by_index_int_value(const int index, int *value){
+int configuration_get_by_index_int_value(const unsigned int index, int *value){
 	if(!value){
 		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Value is null.");
 		return 0;
@@ -337,7 +337,7 @@ int configuration_get_int_value(const char *key, int *value){
 	return 0;
 }
 //---------------------------------------------------------------------------
-int configuration_set_by_index_int_value(const int index, int value){
+int configuration_set_by_index_int_value(const unsigned int index, int value){
 	if(index >= CONFIGURATION_ITEMS_MAX){
 		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Configuration index %d out of bounds.", index);
 		return 0;
@@ -378,7 +378,7 @@ int configuration_set_int_value(const char *key, int value){
 	return 1;
 }
 //---------------------------------------------------------------------------
-int configuration_get_by_index_float_value(const int index, float *value){
+int configuration_get_by_index_float_value(const unsigned int index, float *value){
 	if(!value){
 		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Value is null.");
 		return 0;
@@ -424,7 +424,7 @@ int configuration_get_float_value(const char *key, float *value){
 	return 0;
 }
 //---------------------------------------------------------------------------
-int configuration_set_by_index_float_value(const int index, float value){
+int configuration_set_by_index_float_value(const unsigned int index, float value){
 
 	if(index >= CONFIGURATION_ITEMS_MAX){
 		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Configuration index %d out of bounds.", index);
@@ -464,7 +464,7 @@ int configuration_set_float_value(const char *key, float value){
 	return 1;
 }
 //---------------------------------------------------------------------------
-int configuration_get_by_index_str_value(const int index, const char **value){
+int configuration_get_by_index_str_value(const unsigned int index, const char **value){
 	if(!value){
 		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Value is null.");
 		return 0;
@@ -502,7 +502,7 @@ int configuration_get_str_value(const char *key, const char **value){
 	return 0;
 }
 //---------------------------------------------------------------------------
-int configuration_set_by_index_str_value(const int index, const char *value){
+int configuration_set_by_index_str_value(const unsigned int index, const char *value){
 
 	if(index >= CONFIGURATION_ITEMS_MAX){
 		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Configuration index %d out of bounds.", index);
