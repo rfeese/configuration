@@ -7,21 +7,16 @@
 
 // use X function to define configuration mapping indexes
 # define CONFIGS \
-	X(CONFIG_TIMES_EXECUTED, "times_executed") \
-	X(CONFIG_SETTING2, "setting2") \
-	X(CONFIG_SETTING3, "setting3") \
-	X(CONFIG_SETTING4, "setting4") \
-	X(CONFIG_SETTING5, "setting5") \
-	X(CONFIG_SETTING6, "setting6") \
-	X(CONFIG_SETTING7, "setting7") \
-	X(CONFIG_SETTING8, "setting8")
+	X(CONFIG_TIMES_EXECUTED, "times_executed", CONFIGURATION_VAL_INT, "0") \
+	X(CONFIG_RATIO, "ratio", CONFIGURATION_VAL_FLOAT, "1.2345") \
+	X(CONFIG_MESSAGE, "message", CONFIGURATION_VAL_STR, "Hello,_world!") \
 
-#define X(a,b) a,
+#define X(a,b,c,d) a,
 enum configs {
 	CONFIGS
 };
 #undef X
-#define X(a,b) { b, a },
+#define X(a,b,c,d) { b, a, c, d },
 struct configuration_index_mapping confmap[CONFIGURATION_ITEMS_MAX] = {
 	CONFIGS
 };
