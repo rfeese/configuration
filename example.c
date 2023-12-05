@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include "src/configuration.h"
 
-// use X function to define configuration mapping indexes
+// use X macro to define configuration mapping indexes
 # define CONFIGS \
 	X(CONFIG_TIMES_EXECUTED, "times_executed", CONFIGURATION_VAL_INT, "0") \
 	X(CONFIG_RATIO, "ratio", CONFIGURATION_VAL_FLOAT, "1.2345") \
