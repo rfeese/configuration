@@ -12,14 +12,16 @@
 // TODO: Allow mapping to initialize data type
 // TODO: Allow mapping to initialize data values (defaults)
 // Configuration item key to index mapping
+
+typedef enum config_val_type { CONFIGURATION_VAL_INT, CONFIGURATION_VAL_FLOAT, CONFIGURATION_VAL_STR } t_conf_val_type;
+
 #define CONFIGURATION_KEY_MAX	33
 typedef struct configuration_index_mapping {
 	char key[CONFIGURATION_KEY_MAX];
 	int index;
+	t_conf_val_type val_type;
+	char default_value[CONFIGURATION_VAL_STR_LEN];
 } t_configuration_index_mapping;
-
-
-typedef enum config_val_type { CONFIGURATION_VAL_INT, CONFIGURATION_VAL_FLOAT, CONFIGURATION_VAL_STR } t_conf_val_type;
 
 typedef struct s_config_item {
 	char key[32];

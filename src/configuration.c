@@ -128,6 +128,20 @@ int configuration_init_indexes(t_configuration_index_mapping mappings[CONFIGURAT
 			if((mappings[i].index < CONFIGURATION_ITEMS_MAX)){
 				configuration.mappings[i] = mappings[i];
 				snprintf(configuration.items[mappings[i].index].key, CONFIGURATION_KEY_MAX, "%s", mappings[i].key);
+				configuration.items[mappings[i].index].val_type = mappings[i].val_type;
+				switch(mappings[i].val_type){
+					case CONFIGURATION_VAL_INT:
+						sscanf(mappings[i].default_value, "%d", &configuration.items[mappings[i].index].val.int_value);
+						break;
+
+					case CONFIGURATION_VAL_FLOAT:
+						sscanf(mappings[i].default_value, "%f", &configuration.items[mappings[i].index].val.float_value);
+						break;
+
+					case CONFIGURATION_VAL_STR:
+						sscanf(mappings[i].default_value, "%s", &configuration.items[mappings[i].index].val.str_value);
+						break;
+				}
 			}
 			else {
 				snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Invalid mapping to index %d.", mappings[i].index);

@@ -76,21 +76,31 @@ void test_configuration_init(){
 
 void test_configuration_init_indexes(){
 	struct configuration_index_mapping confmap[CONFIGURATION_ITEMS_MAX] = {
-		{ "three", 3 },
-		{ "two", 2 },
-		{ "one", 1 }
+		{ "three", 3, CONFIGURATION_VAL_INT, "3" },
+		{ "two", 2, CONFIGURATION_VAL_FLOAT, "2.22" },
+		{ "one", 1, CONFIGURATION_VAL_STR, "one" }
 	};
 
 	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_init_indexes(confmap), "configuration_init_indexes should succeed.");
+	
 	TEST_ASSERT_EQUAL_STRING_MESSAGE("three", configuration.mappings[0].key, "configuration mapping key at 0 should be three.");
-	TEST_ASSERT_EQUAL_STRING_MESSAGE("three", configuration.items[3].key, "configuration item key at 3 should be three.");
 	TEST_ASSERT_EQUAL_INT_MESSAGE(3, configuration.mappings[0].index, "configuration mapping index at 0 should be 3.");
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("three", configuration.items[3].key, "configuration item key at 3 should be three.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(CONFIGURATION_VAL_INT, configuration.items[3].val_type, "configuration item 3 should be initialized with type INT");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(3, configuration.items[3].val.int_value, "configuration item 3 should have value 3");
+
 	TEST_ASSERT_EQUAL_STRING_MESSAGE("two", configuration.mappings[1].key, "configuration mapping key at 1 should be two.");
-	TEST_ASSERT_EQUAL_STRING_MESSAGE("two", configuration.items[2].key, "configuration item key at 2 should be two.");
 	TEST_ASSERT_EQUAL_INT_MESSAGE(2, configuration.mappings[1].index, "configuration mapping index at 1 should be 2.");
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("two", configuration.items[2].key, "configuration item key at 2 should be two.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(CONFIGURATION_VAL_FLOAT, configuration.items[2].val_type, "configuration item 2 should be initialized with type FLOAT");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(2.22f, configuration.items[2].val.float_value, "configuration item 2 should have value 2.22");
+
 	TEST_ASSERT_EQUAL_STRING_MESSAGE("one", configuration.mappings[2].key, "configuration mapping key at 2 should be one.");
 	TEST_ASSERT_EQUAL_STRING_MESSAGE("one", configuration.items[1].key, "configuration item key at 1 should be one.");
 	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration.mappings[2].index, "configuration mapping index at 2 should be 1.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(CONFIGURATION_VAL_STR, configuration.items[1].val_type, "configuration item 1 should be initialized with type STR");
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("one", configuration.items[1].val.str_value, "configuration item 1 should have value \"one\"");
+
 	TEST_ASSERT_EQUAL_STRING_MESSAGE("", configuration.mappings[3].key, "configuration mapping key at 3 should be empty.");
 }
 
