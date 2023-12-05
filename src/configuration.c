@@ -139,7 +139,7 @@ int configuration_init_indexes(t_configuration_index_mapping mappings[CONFIGURAT
 						break;
 
 					case CONFIGURATION_VAL_STR:
-						sscanf(mappings[i].default_value, "%s", &configuration.items[mappings[i].index].val.str_value);
+						snprintf(configuration.items[mappings[i].index].val.str_value, CONFIGURATION_VAL_STR_LEN, "%s", mappings[i].default_value);
 						break;
 				}
 			}

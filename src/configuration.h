@@ -9,12 +9,9 @@
 #define CONFIGURATION_ITEMS_MAX 128
 #define CONFIGURATION_VAL_STR_LEN	33
 
-// TODO: Allow mapping to initialize data type
-// TODO: Allow mapping to initialize data values (defaults)
-// Configuration item key to index mapping
-
 typedef enum config_val_type { CONFIGURATION_VAL_INT, CONFIGURATION_VAL_FLOAT, CONFIGURATION_VAL_STR } t_conf_val_type;
 
+// Configuration item key to index mapping
 #define CONFIGURATION_KEY_MAX	33
 typedef struct configuration_index_mapping {
 	char key[CONFIGURATION_KEY_MAX];
