@@ -11,11 +11,11 @@ example: example.c src/configuration.o
 	$(CC) -g $(LDFLAGS) example.c src/configuration.o $(LIBS) -o $@
 
 install:
-	make --directory src $@
+	$(MAKE) --directory src $@
 
 #delete compiled binaries
 clean:
-	make --directory src $@
+	$(MAKE) --directory src $@
 	- rm example
 
 #buid and run tests
