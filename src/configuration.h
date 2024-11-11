@@ -65,10 +65,18 @@ int configuration_get_float_value(const char *key, float *value);
 int configuration_set_by_index_float_value(const unsigned int index, float value);
 int configuration_set_float_value(const char *key, float value);
 
-int configuration_get_by_index_str_value(const unsigned int index, const char **value);
-int configuration_get_str_value(const char *key, const char **value);
+int configuration_get_by_index_str_value(const unsigned int index, char *value, int size);
+int configuration_get_str_value(const char *key, char *value, int size);
 int configuration_set_by_index_str_value(const unsigned int index, const char *value);
 int configuration_set_str_value(const char *key, const char *value);
+
+/* function prototypes for getting and setting */
+typedef int (config_get_int_t)(const char *key, int *value);
+typedef int (config_get_float_t)(const char *key, float *value);
+typedef int (config_get_str_t)(const char *key, char *value, int size);
+typedef int (config_set_int_t)(const char *key, int value);
+typedef int (config_set_float_t)(const char *key, float value);
+typedef int (config_set_str_t)(const char *key, const char *value);
 
 const char *configuration_get_error();
 #endif //CONFIGURATION_H

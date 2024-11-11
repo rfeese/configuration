@@ -478,7 +478,7 @@ int configuration_set_float_value(const char *key, float value){
 	return 1;
 }
 //---------------------------------------------------------------------------
-int configuration_get_by_index_str_value(const unsigned int index, const char **value){
+int configuration_get_by_index_str_value(const unsigned int index, char *value, int size){
 	if(!value){
 		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Value is null.");
 		return 0;
@@ -490,11 +490,11 @@ int configuration_get_by_index_str_value(const unsigned int index, const char **
 		return 0;
 	}
  
-	*value = &configuration.items[index].val.str_value[0];
+	snprintf(value, size, "%s", &configuration.items[index].val.str_value[0]);
 	return 1;
 }
 //---------------------------------------------------------------------------
-int configuration_get_str_value(const char *key, const char **value){
+int configuration_get_str_value(const char *key, char *value, int size){
 	if(!value){
 		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Value is null.");
 		return 0;
@@ -506,7 +506,7 @@ int configuration_get_str_value(const char *key, const char **value){
 				snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Configuration item is not of type str.");
 				return 0;
 			}
-			*value = &configuration.items[i].val.str_value[0];
+			snprintf(value, size, "%s", &configuration.items[i].val.str_value[0]);
 			return 1;
 		}
 	}

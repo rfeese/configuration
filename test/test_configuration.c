@@ -326,30 +326,30 @@ void test_configuration_set_str_value(){
 }
 
 void test_configuration_get_by_index_str_value(){
-	const char *val = NULL;
+	char val[32] = {};
 	configuration.items[0].val_type = CONFIGURATION_VAL_STR;
 	snprintf(configuration.items[0].val.str_value, CONFIGURATION_VAL_STR_LEN, "%s", "test");
-	TEST_ASSERT_EQUAL_INT_MESSAGE(0, configuration_get_by_index_str_value(-1, &val), "should not have got value from index -1.");
-	TEST_ASSERT_EQUAL_INT_MESSAGE(0, configuration_get_by_index_str_value(CONFIGURATION_ITEMS_MAX, &val), "should not have got value from index CONFIGURATION_ITEMS_MAX.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(0, configuration_get_by_index_str_value(-1, &val[0], 32), "should not have got value from index -1.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(0, configuration_get_by_index_str_value(CONFIGURATION_ITEMS_MAX, &val[0], 32), "should not have got value from index CONFIGURATION_ITEMS_MAX.");
 	configuration.items[0].val_type = CONFIGURATION_VAL_INT;
-	TEST_ASSERT_EQUAL_INT_MESSAGE(0, configuration_get_by_index_str_value(CONFIGURATION_ITEMS_MAX, &val), "should not have got STR from INT.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(0, configuration_get_by_index_str_value(CONFIGURATION_ITEMS_MAX, &val[0], 32), "should not have got STR from INT.");
 	configuration.items[0].val_type = CONFIGURATION_VAL_STR;
-	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_get_by_index_str_value(0, &val), "should have got value from index 0.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_get_by_index_str_value(0, &val[0], 32), "should have got value from index 0.");
 	TEST_ASSERT_EQUAL_STRING_MESSAGE("test", val, "should have got \"test\"");
 }
 
 void test_configuration_get_str_value(){
 	reset_configuration();
-	const char *val = NULL;
-	TEST_ASSERT_EQUAL_INT_MESSAGE(0, configuration_get_str_value("test1", &val), "test1 should NOT be configured.");
+	char val[32] = {};
+	TEST_ASSERT_EQUAL_INT_MESSAGE(0, configuration_get_str_value("test1", &val[0], 32), "test1 should NOT be configured.");
 	snprintf(&configuration.items[0].key[0], 32, "%s", "test1");
 	snprintf(&configuration.items[0].val.str_value[0], CONFIGURATION_VAL_STR_LEN, "%s", "str1");
 	configuration.loaded = 1;
 	configuration.num_items = 1;
 	configuration.items[0].val_type = CONFIGURATION_VAL_INT;
-	TEST_ASSERT_EQUAL_INT_MESSAGE(0, configuration_get_str_value("test1", &val), "should not have got STR from INT.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(0, configuration_get_str_value("test1", &val[0], 32), "should not have got STR from INT.");
 	configuration.items[0].val_type = CONFIGURATION_VAL_STR;
-	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_get_str_value("test1", &val), "should have got val for test1");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_get_str_value("test1", &val[0], 32), "should have got val for test1");
 	TEST_ASSERT_EQUAL_STRING_MESSAGE("str1", val, "val should be str1");
 }
 
