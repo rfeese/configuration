@@ -1,7 +1,19 @@
 #include <string.h>
 #include <stdlib.h>
 #include "../../Unity/src/unity.h"
-#include "../src/configuration.h"
+#include "../src/configuration.c"
+
+void reset_configuration(){
+	for(int i = 0; i < CONFIGURATION_ITEMS_MAX; i++){
+		configuration.mappings[i].key[0] = '\0'; 
+		configuration.mappings[i].index = 0; 
+		configuration.items[i].key[0] = '\0'; 
+		configuration.items[i].val_type = CONFIGURATION_VAL_INT; 
+		configuration.items[i].val.int_value = 0; 
+	}
+	configuration.num_items = 0;
+	configuration.loaded = 0;
+}
 
 char *xdg_config_home_orig = NULL;
 char *home_orig = NULL;
@@ -14,10 +26,11 @@ void setUp(void){
 	// set test env
 	setenv("XDG_CONFIG_HOME", "./fixtures", 1);
 
-	configuration_reset();
+	reset_configuration();
 
-	// snprintf(configuration.configdir, 256, "fixtures");
-	configuration_init("configurationtest", "test_configuration.ini");
+	snprintf(configuration.configdir, 256, "fixtures");
+	configuration.configdirok = 1;
+	snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "");
 }
 
 //runs after each test
@@ -38,26 +51,29 @@ void tearDown(void){
 		// unset if env did not exist previously
 		unsetenv("HOME");
 	}
+	// configuration.configdirok = 0;
 }
 
 void test_configuration_init(){
-	configuration_reset();
 	TEST_ASSERT_EQUAL_INT_MESSAGE(0, configuration_init("","fail"), "Configuration init for empty dirname should fail.");
 	TEST_ASSERT_EQUAL_INT_MESSAGE(0, configuration_init("fail",""), "Configuration init for empty filename should fail.");
 
 	// test usage of XDG_CONFIG_HOME
-	configuration_reset();
+	configuration.configdirok = 0;
 	setenv("XDG_CONFIG_HOME", "./fixtures", 1);
 	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_init("configurationtest","configurationtest.ini"), "Configuration init with XDG_CONFIG_HOME should succeed.");
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("./fixtures/configurationtest", configuration.configdir, "configuration.dirname should have been set by XDG_CONFIG_HOME.");
 
 	// test usage of HOME
-	configuration_reset();
+	configuration.configdirok = 0;
 	unsetenv("XDG_CONFIG_HOME");
 	setenv("HOME", "./fixtures", 1);
 	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_init("configurationtest","configurationtest.ini"), "Configuration init with HOME should succeed.");
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("./fixtures/.config/configurationtest", configuration.configdir, "configuration.dirname should have been set by HOME.");
+
+	TEST_ASSERT_EQUAL_INT_MESSAGE(0, configuration.num_items, "number of items should b zero after init.");
 }
 
-/*
 void test_configuration_init_indexes(){
 	struct configuration_index_mapping confmap[CONFIGURATION_ITEMS_MAX] = {
 		{ "three", 3, CONFIGURATION_VAL_INT, "3" },
@@ -66,14 +82,51 @@ void test_configuration_init_indexes(){
 	};
 
 	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_init_indexes(confmap), "configuration_init_indexes should succeed.");
+	
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("three", configuration.mappings[0].key, "configuration mapping key at 0 should be three.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(3, configuration.mappings[0].index, "configuration mapping index at 0 should be 3.");
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("three", configuration.items[3].key, "configuration item key at 3 should be three.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(CONFIGURATION_VAL_INT, configuration.items[3].val_type, "configuration item 3 should be initialized with type INT");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(3, configuration.items[3].val.int_value, "configuration item 3 should have value 3");
+
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("two", configuration.mappings[1].key, "configuration mapping key at 1 should be two.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(2, configuration.mappings[1].index, "configuration mapping index at 1 should be 2.");
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("two", configuration.items[2].key, "configuration item key at 2 should be two.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(CONFIGURATION_VAL_FLOAT, configuration.items[2].val_type, "configuration item 2 should be initialized with type FLOAT");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(2.22f, configuration.items[2].val.float_value, "configuration item 2 should have value 2.22");
+
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("one", configuration.mappings[2].key, "configuration mapping key at 2 should be one.");
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("one", configuration.items[1].key, "configuration item key at 1 should be one.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration.mappings[2].index, "configuration mapping index at 2 should be 1.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(CONFIGURATION_VAL_STR, configuration.items[1].val_type, "configuration item 1 should be initialized with type STR");
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("one", configuration.items[1].val.str_value, "configuration item 1 should have value \"one\"");
+
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("", configuration.mappings[3].key, "configuration mapping key at 3 should be empty.");
 }
 
 void test_configuration_load(){
+	strncpy(configuration.filename, "test_configuration.ini", 32);
 	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_load(), "Configuration should have been loaded.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(8, configuration.num_items, "Number of configuration items should have been eight.");
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("one", configuration.items[0].key, "Configuration one should have been in first configuration slot.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(CONFIGURATION_VAL_INT, configuration.items[0].val_type, "first configuration item type should be int.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(CONFIGURATION_VAL_STR, configuration.items[4].val_type, "fifth configuration item type should be str.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(CONFIGURATION_VAL_FLOAT, configuration.items[6].val_type, "seventh configuration item type should be float.");
 
 	// test load using indexes
-	configuration_reset();
+	reset_configuration();
+	snprintf(configuration.mappings[0].key, CONFIGURATION_KEY_MAX, "%s", "three");
+	configuration.mappings[0].index = 0;
+	snprintf(configuration.mappings[1].key, CONFIGURATION_KEY_MAX, "%s", "two");
+	configuration.mappings[1].index = 1;
+	snprintf(configuration.mappings[2].key, CONFIGURATION_KEY_MAX, "%s", "one");
+	configuration.mappings[2].index = 2;
 	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_load(), "Configuration should have been loaded.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(8, configuration.num_items, "Number of configuration should have been eight.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(8, configuration.num_items, "Number of configuration should have been eight.");
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("two", configuration.items[1].key, "Configuration two should have been at index 1.");
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("one", configuration.items[2].key, "Configuration one should have been at index 2.");
+	TEST_ASSERT_EQUAL_STRING_MESSAGE("three", configuration.items[0].key, "Configuration three should have been at index 0.");
 }
 
 void test_configuration_save(){
@@ -127,12 +180,17 @@ void test_configuration_save(){
 }
 
 void test_configuration_get_configdir(){
+	configuration.configdirok = 0;
+	snprintf(configuration.configdir, 256, "testdir1");
 	TEST_ASSERT_EQUAL_STRING_MESSAGE("", configuration_get_configdir(), "Configdir should be empty if configdir not ok.");
+	configuration.configdirok = 1;
 	TEST_ASSERT_EQUAL_STRING_MESSAGE("testdir1", configuration_get_configdir(), "Configdir should be returned.");
 }
 
 void test_configuration_set_by_index_int_value(){
 	configuration_set_by_index_int_value(0, 1);
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration.items[0].val.int_value, "configuration item at index 0 should have been set to 1.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(CONFIGURATION_VAL_INT, configuration.items[0].val_type, "configuration item at index 0 should have type INT.");
 }
 
 void test_configuration_set_int_value(){
@@ -300,12 +358,10 @@ void test_configuration_get_error(){
 	configuration_set_by_index_float_value(CONFIGURATION_ITEMS_MAX + 1, 0.1f);
         TEST_ASSERT_LESS_THAN_INT_MESSAGE(0, strncmp("", configuration_get_error(), 1), "Should have an error message.");
 }
-*/
 
 int main(){
 	UNITY_BEGIN();
 	RUN_TEST(test_configuration_init);
-	/*
 	RUN_TEST(test_configuration_init_indexes);
 	RUN_TEST(test_configuration_load);
 	RUN_TEST(test_configuration_save);
@@ -323,6 +379,5 @@ int main(){
 	RUN_TEST(test_configuration_get_by_index_str_value);
 	RUN_TEST(test_configuration_get_str_value);
 	RUN_TEST(test_configuration_get_error);
-	*/
 	return UNITY_END();
 }

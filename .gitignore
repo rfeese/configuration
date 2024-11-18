@@ -3,4 +3,5 @@ example
 *.a
 *.swp
 test/test_configuration
+test/test_configuration_internal
 test/fixtures/test_configuration_saved.ini

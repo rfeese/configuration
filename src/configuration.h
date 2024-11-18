@@ -4,70 +4,120 @@
 #ifndef CONFIGURATION_H
 #define CONFIGURATION_H
 
+/**
+ * Reset the configuration data and initialization.
+ */
+void configuration_reset();
 
-/* TODO: make config items array automatically expandable */
-#define CONFIGURATION_ITEMS_MAX 128
-#define CONFIGURATION_VAL_STR_LEN	33
-
-typedef enum config_val_type { CONFIGURATION_VAL_INT, CONFIGURATION_VAL_FLOAT, CONFIGURATION_VAL_STR } t_conf_val_type;
-
-// Configuration item key to index mapping
-#define CONFIGURATION_KEY_MAX	33
-typedef struct configuration_index_mapping {
-	char key[CONFIGURATION_KEY_MAX];
-	int index;
-	t_conf_val_type val_type;
-	char default_value[CONFIGURATION_VAL_STR_LEN];
-} t_configuration_index_mapping;
-
-typedef struct s_config_item {
-	char key[32];
-	t_conf_val_type val_type;
-	union {
-		int int_value;
-		float float_value;
-		char str_value[CONFIGURATION_VAL_STR_LEN];
-	} val;
-} t_config_item;
-
-#define CONFIGURATION_ERROR_MSG_LEN 128
-
-typedef struct s_configuration {
-	// directory to contain configuration file(s)
-	char dirname[32];
-	// name of configuration file
-	char filename[32];
-	char configdir[256];
-	int configdirok;
-	int loaded;
-	int saved;
-	int num_items;
-	t_config_item items[CONFIGURATION_ITEMS_MAX];
-	t_configuration_index_mapping mappings[CONFIGURATION_ITEMS_MAX];
-	char error_msg[CONFIGURATION_ERROR_MSG_LEN];
-} t_configuration;
-
-extern t_configuration configuration;
-
+/**
+ * Initialize the configuration, find location for config file.
+ *
+ * \param config_dirname The directory name to contain configuration.
+ * \param config_filename The configuration filename.
+ * \return 1 if suitable configuration directory was found.
+ */
 int configuration_init(char config_dirname[], char config_filename[]);
-int configuration_init_indexes(t_configuration_index_mapping mappings[CONFIGURATION_ITEMS_MAX]);
+
+/**
+ * Load the configuration file.
+ *
+ * \return 1 if configuration was loaded successfully.
+ */
 int configuration_load();
+
+/**
+ * Save the configuration file.
+ *
+ * \return 1 if configuration was saved successfully.
+ */
 int configuration_save();
+
+/**
+ * Get the current configuration directory.
+ *
+ * \return String representing configuration file path.
+ */
 const char * configuration_get_configdir();
 
+/**
+ * Get the integer value stored at the provided index.
+ *
+ * \param index Configuration array index.
+ * \param value Pointer to integer value fetched from configuration.
+ * \return 1 if a valid integer value was found.
+ */
 int configuration_get_by_index_int_value(const unsigned int index, int *value);
+
+/**
+ * Get the integer value corresponding to the provided configuration key.
+ *
+ * \param key Key to search for.
+ * \param value Pointer to integer value fetched from configuration.
+ * \return 1 if a valid value was found.
+ */
 int configuration_get_int_value(const char *key, int *value);
+
+/**
+ * Set an integer configuration value at the provided index.
+ *
+ * \param key Key to store a value under.
+ * \param value Integer value to store.
+ * \return 1 if value was stored successfully.
+ */
 int configuration_set_by_index_int_value(const unsigned int index, int value);
+
+/**
+ * Set an integer configuration value corresponding to the provided key.
+ *
+ * \param key Key to store a value under.
+ * \param value Integer value to store.
+ * \return 1 if a valid value stored successfully.
+ */
 int configuration_set_int_value(const char *key, int value);
 
 int configuration_get_by_index_float_value(const unsigned int index, float *value);
+
+/**
+ * Get the float value corresponding to the provided configuration key.
+ *
+ * \param key Key to search for.
+ * \param value Pointer to integer value fetched from configuration.
+ * \return 1 if a valid value was found.
+ */
 int configuration_get_float_value(const char *key, float *value);
+
 int configuration_set_by_index_float_value(const unsigned int index, float value);
+
+/**
+ * Set a float configuration value corresponding to the provided key.
+ *
+ * \param key Key to store a value under.
+ * \param value Float value to store.
+ * \return 1 if a valid value stored successfully.
+ */
 int configuration_set_float_value(const char *key, float value);
 
 int configuration_get_by_index_str_value(const unsigned int index, char *value, int size);
+
+/**
+ * Get the string value corresponding to the provided configuration key.
+ *
+ * \param key Key to search for.
+ * \param value Pointer to caller-provided char buffer fetched from configuration.
+ * \param size of provided caller-provided char buffer.
+ * \return 1 if a valid value was found.
+ */
 int configuration_get_str_value(const char *key, char *value, int size);
+
 int configuration_set_by_index_str_value(const unsigned int index, const char *value);
+
+/**
+ * Set a string configuration value corresponding to the provided key.
+ *
+ * \param key Key to store a value under.
+ * \param value Pointer to char buffer value to store.
+ * \return 1 if a valid value stored successfully.
+ */
 int configuration_set_str_value(const char *key, const char *value);
 
 /* function prototypes for getting and setting */
@@ -78,5 +128,10 @@ typedef int (config_set_int_t)(const char *key, int value);
 typedef int (config_set_float_t)(const char *key, float value);
 typedef int (config_set_str_t)(const char *key, const char *value);
 
+/**
+ * Get the most recent error.
+ *
+ * \return Error string.
+ */
 const char *configuration_get_error();
 #endif //CONFIGURATION_H

@@ -10,9 +10,65 @@
 #include <direct.h> /* for _mkdir */
 #endif
 
+/* TODO: make config items array automatically expandable */
+#define CONFIGURATION_ITEMS_MAX 128
+
+typedef enum config_val_type { CONFIGURATION_VAL_INT, CONFIGURATION_VAL_FLOAT, CONFIGURATION_VAL_STR } t_conf_val_type;
+
+#define CONFIGURATION_KEY_MAX	33
+#define CONFIGURATION_VAL_STR_LEN	33
+
+// Configuration item key to index mapping
+typedef struct configuration_index_mapping {
+	char key[CONFIGURATION_KEY_MAX];
+	int index;
+	t_conf_val_type val_type;
+	char default_value[CONFIGURATION_VAL_STR_LEN];
+} t_configuration_index_mapping;
+
+typedef struct s_config_item {
+	char key[32];
+	t_conf_val_type val_type;
+	union {
+		int int_value;
+		float float_value;
+		char str_value[CONFIGURATION_VAL_STR_LEN];
+	} val;
+} t_config_item;
+
+#define CONFIGURATION_ERROR_MSG_LEN 128
+
+typedef struct s_configuration {
+	// directory to contain configuration file(s)
+	char dirname[32];
+	// name of configuration file
+	char filename[32];
+	char configdir[256];
+	int configdirok;
+	int loaded;
+	int saved;
+	int num_items;
+	t_config_item items[CONFIGURATION_ITEMS_MAX];
+	t_configuration_index_mapping mappings[CONFIGURATION_ITEMS_MAX];
+	char error_msg[CONFIGURATION_ERROR_MSG_LEN];
+} t_configuration;
+
 t_configuration configuration = { .dirname = "configuration", .filename = "configuration.ini", .configdir = "config" };
 
-
+//---------------------------------------------------------------------------
+void configuration_reset(){
+	for(int i = 0; i < CONFIGURATION_ITEMS_MAX; i++){
+		configuration.mappings[i].key[0] = '\0'; 
+		configuration.mappings[i].index = 0; 
+		configuration.items[i].key[0] = '\0'; 
+		configuration.items[i].val_type = CONFIGURATION_VAL_INT; 
+		configuration.items[i].val.int_value = 0; 
+	}
+	configuration.num_items = 0;
+	configuration.loaded = 0;
+	configuration.error_msg[0] = '\0';
+	configuration.configdirok = 0;
+}
 //---------------------------------------------------------------------------
 int _configdir_init(int create_configdir){
 
