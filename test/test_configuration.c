@@ -57,25 +57,61 @@ void test_configuration_init(){
 	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_init("configurationtest","configurationtest.ini"), "Configuration init with HOME should succeed.");
 }
 
-/*
-void test_configuration_init_indexes(){
-	struct configuration_index_mapping confmap[CONFIGURATION_ITEMS_MAX] = {
-		{ "three", 3, CONFIGURATION_VAL_INT, "3" },
-		{ "two", 2, CONFIGURATION_VAL_FLOAT, "2.22" },
-		{ "one", 1, CONFIGURATION_VAL_STR, "one" }
-	};
-
-	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_init_indexes(confmap), "configuration_init_indexes should succeed.");
-}
-
 void test_configuration_load(){
+
+	// test file does not exist	
+	configuration_init("configurationtest", "fake_configuration.ini");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(0, configuration_load(), "Fake configuration file should not have been loaded.");
+	TEST_ASSERT_NOT_EQUAL_INT_MESSAGE(0, strnlen(configuration_get_error(), 32), "There should be an error message.");
+
+	configuration_init("configurationtest", "test_configuration.ini");
 	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_load(), "Configuration should have been loaded.");
 
-	// test load using indexes
-	configuration_reset();
-	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_load(), "Configuration should have been loaded.");
+	// retrieve values from loaded config
+	int intval = 8;
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_get_int_value("testint", &intval), "Get testint should succeed.");
+	float floatval = 8.0f;
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_get_float_value("testfloat", &floatval), "Get testfloat should succeed.");
+	TEST_ASSERT_EQUAL_FLOAT_MESSAGE(2.0f, floatval, "Retrieved floatval should have been 2.0.");
+	char strval[32];
+	snprintf(strval, 32, "eight");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_get_str_value("teststr", &strval[0], 32), "Get teststr should succeed.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(0, strncmp("three", strval, 32), "Retrieved strval should have been three.");
 }
 
+void test_set_get(){
+	int intval;
+	TEST_ASSERT_EQUAL_INT_MESSAGE(0, configuration_get_int_value("non-existant", &intval), "Getting non-existant int should fail.");
+	TEST_ASSERT_NOT_EQUAL_INT_MESSAGE(0, strnlen(configuration_get_error(), 32), "There should be an error message.");
+
+	intval = 5;
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_set_int_value("testint1", intval), "Set testint1 should succeed.");
+	intval = 6;
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_get_int_value("testint1", &intval), "Get testint1 should succeed.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(5, intval, "Retrieved intval should have been 5.");
+
+	float floatval;
+	TEST_ASSERT_EQUAL_INT_MESSAGE(0, configuration_get_float_value("non-existant", &floatval), "Getting non-existant float should fail.");
+	TEST_ASSERT_NOT_EQUAL_INT_MESSAGE(0, strnlen(configuration_get_error(), 32), "There should be an error message.");
+
+	floatval = 5.0f;
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_set_float_value("testfloat1", floatval), "Set testfloat1 should succeed.");
+	floatval = 6.0f;
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_get_float_value("testfloat1", &floatval), "Get testfloat1 should succeed.");
+	TEST_ASSERT_EQUAL_FLOAT_MESSAGE(5.0f, floatval, "Retrieved floatval should have been 5.0.");
+
+	char strval[32];
+	TEST_ASSERT_EQUAL_INT_MESSAGE(0, configuration_get_str_value("non-existant", &strval[0], 32), "Getting non-existant float should fail.");
+	TEST_ASSERT_NOT_EQUAL_INT_MESSAGE(0, strnlen(configuration_get_error(), 32), "There should be an error message.");
+
+	snprintf(strval, 32, "five");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_set_str_value("teststr1", strval), "Set teststr1 should succeed.");
+	snprintf(strval, 32, "six");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, configuration_get_str_value("teststr1", &strval[0], 32), "Get teststr1 should succeed.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(0, strncmp("five", strval, 32), "Retrieved strval should have been five.");
+}
+
+/*
 void test_configuration_save(){
 	strncpy(configuration.filename, "test_configuration_saved.ini", 32);
 	strncpy(configuration.items[0].key, "test1", 32);
@@ -305,9 +341,9 @@ void test_configuration_get_error(){
 int main(){
 	UNITY_BEGIN();
 	RUN_TEST(test_configuration_init);
-	/*
-	RUN_TEST(test_configuration_init_indexes);
 	RUN_TEST(test_configuration_load);
+	RUN_TEST(test_set_get);
+	/*
 	RUN_TEST(test_configuration_save);
 	RUN_TEST(test_configuration_get_configdir);
 	RUN_TEST(test_configuration_set_by_index_int_value);
