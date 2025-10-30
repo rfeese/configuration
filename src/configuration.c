@@ -174,7 +174,7 @@ int configuration_init(char config_dirname[], char config_filename[]){
 	}
 	snprintf(configuration.dirname, 32, "%s", config_dirname);
 	snprintf(configuration.filename, 32, "%s", config_filename);
-	snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "");
+	configuration.error_msg[0] = '\0';
 	return _configdir_init(1);
 }
 //---------------------------------------------------------------------------
@@ -240,7 +240,7 @@ int configuration_load(){
 	FILE *configfile = NULL;
 	configfile = fopen(fqconfigname, "r");
 	if(!configfile){
-		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Unable to open configfile.");
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Unable to open configfile %s.", fqconfigname);
 		return 0;
 	}
 
