@@ -167,9 +167,11 @@ int _configdir_init(int create_configdir){
 int configuration_init(char config_dirname[], char config_filename[]){
 
 	if(!strlen(config_dirname)){
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Specified config dirname was empty.");
 		return 0;
 	}
 	if(!strlen(config_filename)){
+		snprintf(configuration.error_msg, CONFIGURATION_ERROR_MSG_LEN, "Specified config filename was empty.");
 		return 0;
 	}
 	snprintf(configuration.dirname, 32, "%s", config_dirname);
