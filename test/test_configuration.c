@@ -24,11 +24,11 @@ void setUp(void){
 void tearDown(void){
 	if(xdg_config_home_orig){
 		// restore original env
-		setenv("XDG_CONFIGURATION_HOME", xdg_config_home_orig, 1);
+		setenv("XDG_CONFIG_HOME", xdg_config_home_orig, 1);
 	}
 	else {
 		// unset if env did not exist previously
-		unsetenv("XDG_CONFIGURATION_HOME");
+		unsetenv("XDG_CONFIG_HOME");
 	}
 	if(home_orig){
 		// restore original env
